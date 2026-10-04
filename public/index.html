@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ thống Quản lý Cửa hàng Thú cưng</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
+        h1 { text-align: center; color: #2c3e50; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .tab-btn { padding: 10px 20px; background: #34495e; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .tab-btn.active { background: #27ae60; }
+        .tab-content { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tab-content.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #27ae60; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🐾 Hệ thống Quản lý Cửa hàng Thú cưng</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('petsTab')">Thú Cưng</button>
+        <button class="tab-btn" onclick="showTab('customersTab')">Khách Hàng</button>
+        <button class="tab-btn" onclick="showTab('servicesTab')">Dịch Vụ Spa</button>
+        <button class="tab-btn" onclick="showTab('appointmentsTab')">Lịch Hẹn Spa</button>
+    </div>
+
+    <!-- Tab 1: Thú Cưng -->
+    <div id="petsTab" class="tab-content active">
+        <h2>Danh sách Thú Cưng</h2>
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Tên Thú Cưng</th><th>Chủng Loại</th><th>Giá Bán</th></tr>
+            </thead>
+            <tbody id="petsBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Tab 2: Khách Hàng -->
+    <div id="customersTab" class="tab-content">
+        <h2>Danh sách Khách Hàng</h2>
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Tên Khách Hàng</th><th>Số Điện Thoại</th><th>Email</th></tr>
+            </thead>
+            <tbody id="customersBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Tab 3: Dịch Vụ Spa -->
+    <div id="servicesTab" class="tab-content">
+        <h2>Bảng Giá Dịch Vụ Spa</h2>
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Tên Dịch Vụ</th><th>Giá Dịch Vụ</th></tr>
+            </thead>
+            <tbody id="servicesBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Tab 4: Lịch Hẹn -->
+    <div id="appointmentsTab" class="tab-content">
+        <h2>Danh sách Lịch Hẹn Spa</h2>
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Thú Cưng</th><th>Khách Hàng</th><th>Dịch Vụ</th><th>Ngày Hẹn</th><th>Trạng Thái</th></tr>
+            </thead>
+            <tbody id="appointmentsBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadData() {
+            // Load Pets
+            const resPets = await fetch('/api/pets');
+            const pets = await resPets.json();
+            document.getElementById('petsBody').innerHTML = pets.map(p => 
+                `<tr><td>${p.id}</td><td><b>${p.name}</b></td><td>${p.type}</td><td>${Number(p.price).toLocaleString('vi-VN')} đ</td></tr>`
+            ).join('');
+
+            // Load Customers
+            const resCustomers = await fetch('/api/customers');
+            const customers = await resCustomers.json();
+            document.getElementById('customersBody').innerHTML = customers.map(c => 
+                `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.email || 'N/A'}</td></tr>`
+            ).join('');
+
+            // Load Services
+            const resServices = await fetch('/api/services');
+            const services = await resServices.json();
+            document.getElementById('servicesBody').innerHTML = services.map(s => 
+                `<tr><td>${s.id}</td><td>${s.name}</td><td>${Number(s.price).toLocaleString('vi-VN')} đ</td></tr>`
+            ).join('');
+
+            // Load Appointments
+            const resApp = await fetch('/api/appointments');
+            const appointments = await resApp.json();
+            document.getElementById('appointmentsBody').innerHTML = appointments.map(a => 
+                `<tr><td>${a.id}</td><td>${a.pet_name || 'N/A'}</td><td>${a.customer_name || 'N/A'}</td><td>${a.service_name || 'N/A'}</td><td>${new Date(a.appointment_date).toLocaleString('vi-VN')}</td><td>${a.status}</td></tr>`
+            ).join('');
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
